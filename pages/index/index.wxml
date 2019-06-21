@@ -11,3 +11,13 @@
     <text class="user-motto">{{motto}}</text>
   </view>
 </view>
+<view>{{ msg }}</view>
+
+
+
+<view> Hello {{name}}! </view>
+<button bindtap="changeName"> Click me! </button>
+
+<button bindtap="changeClick"> Click me! </button>
+
+

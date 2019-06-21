@@ -2,12 +2,15 @@
 //获取应用实例
 const app = getApp()
 
+
+
 Page({
   data: {
     motto: 'Hello World',
     userInfo: {},
     hasUserInfo: false,
-    canIUse: wx.canIUse('button.open-type.getUserInfo')
+    canIUse: wx.canIUse('button.open-type.getUserInfo'),
+      name: 'WeChat'
   },
   //事件处理函数
   bindViewTap: function() {
@@ -50,5 +53,42 @@ Page({
       userInfo: e.detail.userInfo,
       hasUserInfo: true
     })
+  },
+  changeName: function(e) {
+      // sent data change to view
+      this.setData({
+          name: 'MINA'
+      })
+  },
+  changeClick: function(e) {
+
+      wx.login({
+          success: res => {
+              // 发送 res.code 到后台换取 openId, sessionKey, unionId
+              console.log(res);
+              wx.request({
+                  url: 'https://mini.poxx.top/app/controller/index.php',
+                  data: {
+                      code : res.code
+                  },
+                  header: {
+                      'content-type': 'application/json' // 默认值
+                  },
+                  success (res1) {
+                      console.log(res1.data)
+
+
+                  }
+              })
+
+          }
+      })
+
+
   }
+
+
+
 })
+
+
