@@ -6,9 +6,8 @@
  * Time: 14:35
  */
 
-
-$AppID = 'wx27f53e69a18387be';
-$AppSecret = '';
+define(APPID,'wx27f53e69a18387be');
+define(APPSECRET,'');
 
 
 
