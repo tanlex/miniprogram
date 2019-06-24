@@ -67,7 +67,7 @@ Page({
               // 发送 res.code 到后台换取 openId, sessionKey, unionId
               console.log(res);
               wx.request({
-                  url: 'https://mini.poxx.top/app/controller/index.php',
+                  url: 'https://mini.poxx.top/app/controller/index.php?act=service_send',
                   data: {
                       code : res.code
                   },
