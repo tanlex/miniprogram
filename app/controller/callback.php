@@ -41,31 +41,71 @@ $res = file_put_contents('./callback.log',$postStr."\n",FILE_APPEND);
 if (!empty($postStr) && is_string($postStr)) {
 
     $postArr = json_decode($postStr, true);
-    if (!empty($postArr['MsgType']) && $postArr['MsgType'] == 'text') {   //文本消息
-        $fromUsername = $postArr['FromUserName'];   //发送者openid
-        $toUserName = $postArr['ToUserName'];       //小程序id
-        $Content = $postStr['Content'];
+    $fromUsername = $postArr['FromUserName'];   //发送者openid
+    $toUserName = $postArr['ToUserName'];       //小程序id
+    if (!empty($postArr['MsgType']) && $postArr['MsgType'] == 'text')
+    {
+        //文本消息
+        $Content = $postArr['Content'];
+        file_put_contents('./callback.log',$Content."\n",FILE_APPEND);
 
         if($Content == '你好'){
-            //客服回复
+            //客服回复接口
             $access_token = get_access_token($AppID,$AppSecret);
             $access_token = json_decode($access_token);
             $access_token = $access_token->access_token;
             $url = "https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token={$access_token}";
-            $data = array(
-                'access_token' => $access_token,
-                'touser' => $openid,
+            $data = [
+                'touser'  => $fromUsername,
                 'msgtype' => 'text',
-                'text'  => array(
-                    'content' => '您好，这是小程序平台'
-                )
-            );
+                'text'    => ['content'=>'您好，这是小程序平台']
+            ];
             $MyGuzzlehttp = new MyGuzzlehttp();
             $res = $MyGuzzlehttp->post($url,[
                 'json' => $data
             ]);
+            file_put_contents('./callback.log',$res->body."\n",FILE_APPEND);
         }
     }
+    elseif($postArr['MsgType'] == 'event' && $postArr['Event']=='user_enter_tempsession')
+    {
+        //进入客服动作
+        $access_token = get_access_token($AppID,$AppSecret);
+        $access_token = json_decode($access_token);
+        $access_token = $access_token->access_token;
+
+        $content = '您好，有什么能帮助你?';
+        $data=array(
+            "touser"=>$fromUsername,
+            "msgtype"=>"text",
+            "text"=>array("content"=>$content)
+        );
+        $json = json_encode($data,JSON_UNESCAPED_UNICODE);
+
+        $url = "https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token={$access_token}";
+        //以'json'格式发送post的https请求
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, $url);
+        curl_setopt($curl, CURLOPT_POST, 1); // 发送一个常规的Post请求
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, FALSE);
+        if (!empty($json)){
+            curl_setopt($curl, CURLOPT_POSTFIELDS,$json);
+        }
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        //curl_setopt($curl, CURLOPT_HTTPHEADER, $headers );
+        $output = curl_exec($curl);
+        if (curl_errno($curl)) {
+            //捕抓异常
+            file_put_contents('./callback.log','Errno'.curl_error($curl)."\n",FILE_APPEND);
+        }
+        curl_close($curl);
+
+        file_put_contents('./callback.log',$output."\n",FILE_APPEND);
+
+    }
+
+
 }
 
 
@@ -73,6 +113,7 @@ function get_access_token($AppID,$AppSecret)
 {
     $url = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={$AppID}&secret={$AppSecret}";
     $res = file_get_contents($url);
+    file_put_contents('./callback.log',$res."\n",FILE_APPEND);
     return $res;
 }
 
